@@ -4,6 +4,8 @@ public class AmexCodingTaskApplication {
 
     public static void main(String[] args){
         CalculateCost cc = new CalculateCost();
-        cc.returnPrice(args);
+        String[] temp = new String[]{"Orange","Orange","Orange", "Orange", "Orange", "Apple", "Apple", "Apple", "Apple"};
+
+        cc.returnPrice(temp);
     }
 }

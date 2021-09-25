@@ -1,5 +1,7 @@
 package service;
 
+import rx.subjects.PublishSubject;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +9,8 @@ import java.util.Map;
 public class CalculateCost {
     private final Map<Groceries, BigDecimal> prices;
     private final Map<Groceries, Integer> order;
+    private final PublishSubject<String> messages;
+
 
 
     public CalculateCost(){
@@ -15,10 +19,12 @@ public class CalculateCost {
         prices.put(Groceries.ORANGE, BigDecimal.valueOf(.25));
 
         this.order = new HashMap<>();
+        messages = messagingService();
 
     }
 
     public BigDecimal returnPrice(String[] groceries){
+        messages.onNext("Please be patient Customer 1. Your order in being prepared now");
         BigDecimal sum = BigDecimal.ZERO;
 
         int apples = 0;
@@ -41,7 +47,8 @@ public class CalculateCost {
             sum = order.get(Groceries.ORANGE) == 1 ? sum.add(prices.get(Groceries.ORANGE)) : sum.add(buyThreeForTwoDeal(Groceries.ORANGE));
         }
 
-        System.out.println("Cost of groceries: $" + sum.setScale(2));
+        messages.onNext("Customer 1's order is out for delivery!");
+        messages.onNext("Customer 1 order completed. Cost of groceries: $" + sum);
         return sum.setScale(2);
     }
 
@@ -73,6 +80,12 @@ public class CalculateCost {
 
     public void setOrder(Groceries item, Integer order){
         this.order.put(item, order);
+    }
+
+    public PublishSubject<String> messagingService(){
+        PublishSubject<String> messages = PublishSubject.create();
+        messages.subscribe(System.out::println);
+        return messages;
     }
 
 }
