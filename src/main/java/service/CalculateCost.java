@@ -10,6 +10,7 @@ public class CalculateCost {
     private final Map<Groceries, BigDecimal> prices;
     private final Map<Groceries, Integer> order;
     private final PublishSubject<String> messages;
+    private Map<Groceries, Integer> stock;
 
 
 
@@ -21,6 +22,9 @@ public class CalculateCost {
         this.order = new HashMap<>();
         messages = messagingService();
 
+        this.stock = new HashMap<>();
+        stock.put(Groceries.APPLE, 3);
+        stock.put(Groceries.ORANGE, 4);
     }
 
     public BigDecimal returnPrice(String[] groceries){
@@ -40,10 +44,12 @@ public class CalculateCost {
         }
 
         if(order.get(Groceries.APPLE) != null){
+            enoughProductInStock(Groceries.APPLE);
             sum = order.get(Groceries.APPLE) == 1 ? sum.add(prices.get(Groceries.APPLE)) : sum.add(buyOneGetOneDeal(Groceries.APPLE));
         }
 
         if(order.get(Groceries.ORANGE) != null) {
+            enoughProductInStock(Groceries.ORANGE);
             sum = order.get(Groceries.ORANGE) == 1 ? sum.add(prices.get(Groceries.ORANGE)) : sum.add(buyThreeForTwoDeal(Groceries.ORANGE));
         }
 
@@ -68,6 +74,21 @@ public class CalculateCost {
             sum = sum.add((prices.get(item)).multiply(BigDecimal.valueOf(order.get(item)))).subtract((prices.get(item)).multiply(BigDecimal.valueOf((order.get(item)) % 3).subtract(BigDecimal.ONE)));
         }
         return sum;
+    }
+
+    public boolean enoughProductInStock(Groceries item){
+        boolean enoughProduct = true;
+        if(order.get(item) > stock.get(item)){
+            messages.onNext("Our apologies, but we cannot completely fill your order of "+item.label+" due to a shortage.");
+            order.put(item, stock.get(item));
+            stock.put(item, 0);
+            enoughProduct = false;
+        }
+        return enoughProduct;
+    }
+
+    public void setStock(Groceries item, Integer amount){
+        stock.put(item, amount);
     }
 
     public void setPrices(Groceries item, BigDecimal price){

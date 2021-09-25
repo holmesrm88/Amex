@@ -108,4 +108,42 @@ public class CalculateCostTest {
         tcc.assertValue(cc);
         tcc.assertNoErrors();
     }
+
+    @Test
+    public void enoughProductInStockTest_success(){
+        cc.setOrder(Groceries.APPLE, 3);
+        boolean enoughProduct = cc.enoughProductInStock(Groceries.APPLE);
+        Assert.assertTrue(enoughProduct);
+        ts.assertNoErrors();
+    }
+
+    @Test
+    public void enoughProductInStockTest_fail(){
+        cc.setOrder(Groceries.ORANGE, 4);
+        cc.setStock(Groceries.ORANGE, 1);
+        boolean enoughProduct = cc.enoughProductInStock(Groceries.ORANGE);
+        Assert.assertFalse(enoughProduct);
+        ts.assertNoErrors();
+    }
+
+    @Test
+    public void returnPriceTest_successNotEnoughOranges(){
+        BigDecimal sum = cc.returnPrice(new String[]{"Orange","Orange","Orange","Orange", "Orange", "Apple", "Apple", "Apple"});
+        Assert.assertEquals(BigDecimal.valueOf(1.95).setScale(2), sum);
+        ts.assertNoErrors();
+    }
+
+    @Test
+    public void returnPriceTest_successNotEnoughApples(){
+        BigDecimal sum = cc.returnPrice(new String[]{"Orange","Orange","Orange","Orange", "Apple", "Apple", "Apple", "Apple"});
+        Assert.assertEquals(BigDecimal.valueOf(1.95), sum);
+        ts.assertNoErrors();
+    }
+
+    @Test
+    public void returnPriceTest_successNotEnoughApplesOrOranges(){
+        BigDecimal sum = cc.returnPrice(new String[]{"Orange","Orange","Orange","Orange" ,"Orange", "Apple", "Apple", "Apple", "Apple"});
+        Assert.assertEquals(BigDecimal.valueOf(1.95), sum);
+        ts.assertNoErrors();
+    }
 }
